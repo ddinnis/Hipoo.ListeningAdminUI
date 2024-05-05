@@ -10,31 +10,32 @@
         >
       </el-button-group>
     </div>
-    <div class="encodingEpisodes">
-      <el-table
-        row-key="id"
-        :data="encodingEpisodes"
-        v-if="encodingEpisodes.length > 0"
-        style="width: 100%"
-      >
+    <div class="encodingEpisodes" v-if="encodingEpisodes.length > 0">
+      <el-table row-key="id" :data="encodingEpisodes" style="width: 100%">
         <el-table-column
           prop="name.chinese"
           label="中文标题"
-          width="200px"
+          width="220px"
         ></el-table-column>
         <el-table-column
           prop="name.english"
           label="英文标题"
-          width="150px"
+          width="220px"
         ></el-table-column>
-        <el-table-column prop="durationInSecond" width="60px" label="秒数">
+        <el-table-column prop="durationInSecond" width="100px" label="秒数">
         </el-table-column>
         <el-table-column label="转码状态" width="120px">
           <template #default="scope">
-            {{ renderEncodingStatus(scope.row.status) }}
+            <el-tag
+              :type="renderEncodingStatusTag(scope.row.status)"
+              style="margin-left: 10px"
+            >
+              {{ renderEncodingStatus(scope.row.status) }}</el-tag
+            >
           </template>
         </el-table-column>
       </el-table>
+      <el-divider />
     </div>
 
     <div class="content">
@@ -44,17 +45,17 @@
         :row-class-name="tableRowClassName"
         style="width: 100%"
       >
-        <el-table-column label="中文标题" width="180">
+        <el-table-column label="中文标题" width="220">
           <template slot-scope="scope">
             <span style="margin-left: 10px">{{ scope.row.name.chinese }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="英文标题" width="180">
+        <el-table-column label="英文标题" width="220">
           <template slot-scope="scope">
             <span style="margin-left: 10px">{{ scope.row.name.english }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="字幕类型" width="180">
+        <el-table-column label="字幕类型" width="80">
           <template slot-scope="scope">
             <el-tag type="success" style="margin-left: 10px">{{
               scope.row.subtitleType
@@ -308,6 +309,16 @@ export default {
       };
       const value = dict[status];
       return value ? value : "未知";
+    },
+    renderEncodingStatusTag(status) {
+      const dict = {
+        Created: "warning",
+        Started: "info",
+        Failed: "danger",
+        Completed: "success",
+      };
+      const value = dict[status];
+      return value ? value : "";
     },
     addEposide() {
       this.$router.push({

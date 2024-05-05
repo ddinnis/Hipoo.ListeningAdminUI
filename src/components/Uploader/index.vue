@@ -21,13 +21,13 @@
     >
       <el-button size="small" type="primary">选择文件</el-button>
     </el-upload>
-    <el-button
+    <!-- <el-button
       class="uploadBtn"
       size="small"
       type="success"
       @click="handleUpload"
       >上传</el-button
-    >
+    > -->
   </div>
 </template>
 
@@ -70,7 +70,7 @@ export default {
         await isFileExist(fileSize, hash).then((res) => {
           console.log("res", res);
 
-          const { isExists, url } = res;
+          const { isExists, url = "" } = res;
           if (isExists) {
             this.fileInput = url;
             document.getElementById("input").value = url;
@@ -100,7 +100,7 @@ export default {
       const config = {
         headers: { "Content-Type": "multipart/form-data" },
       };
-      uploadFile(formData, config).then((res) => {
+      uploadFile(formData, config).then((url) => {
         _this.$emit("audioUrl", url);
       });
     },

@@ -4,12 +4,12 @@
       >创建分类</el-button
     >
     <el-table :data="categories" style="width: 100%">
-      <el-table-column label="中文标题" width="180">
+      <el-table-column label="中文标题" width="220">
         <template slot-scope="scope">
           <span style="margin-left: 10px">{{ scope.row.name.chinese }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="英文标题" width="180">
+      <el-table-column label="英文标题" width="220">
         <template slot-scope="scope">
           <span style="margin-left: 10px">{{ scope.row.name.english }}</span>
         </template>
