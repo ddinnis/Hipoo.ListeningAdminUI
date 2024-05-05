@@ -1,6 +1,8 @@
 <template>
   <div class="main">
-    <el-button type="primary" class="addCate">创建专辑</el-button>
+    <el-button type="primary" class="addCate" @click="addAlbumClick"
+      >创建专辑</el-button
+    >
     <el-table
       row-key="id"
       :data="Albums"
@@ -61,31 +63,37 @@
         </template>
       </el-table-column>
     </el-table>
-    <el-dialog
-      title="Edit Category"
-      :visible.sync="dialogVisible"
-      width="40%"
-      :before-close="handleClose"
-    >
-      <el-form v-model="formData" ref="form" label-width="80px">
-        <el-row :gutter="24">
-          <el-col :span="12">
-            <el-form-item label="中文标题">
-              <el-input v-model="formData.name.chinese"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="英文标题">
-              <el-input v-model="formData.name.english"></el-input>
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible = false">Cancel</el-button>
-        <el-button type="primary" @click="handleComfirm">Confirm</el-button>
-      </span>
-    </el-dialog>
+    <div class="dialog">
+      <el-dialog
+        :title="title"
+        :visible.sync="dialogVisible"
+        width="40%"
+        :before-close="handleClose"
+      >
+        <el-form v-model="formData" ref="form" label-width="80px">
+          <el-row :gutter="24">
+            <el-col :span="12">
+              <el-form-item label="中文标题">
+                <el-input v-model="formData.name.chinese"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="英文标题">
+                <el-input v-model="formData.name.english"></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-input
+            v-model="formData.categoryId"
+            style="display: none"
+          ></el-input>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="dialogVisible = false">Cancel</el-button>
+          <el-button type="primary" @click="handleComfirm">Confirm</el-button>
+        </span>
+      </el-dialog>
+    </div>
   </div>
 </template>
 
@@ -96,8 +104,9 @@ import {
   showAlbum,
   hideAlbum,
   updateAlbum,
+  addAlbum,
 } from "@/api/album.js";
-import { Message, Tree } from "element-ui";
+import { Message } from "element-ui";
 
 export default {
   name: "Album",
@@ -106,41 +115,59 @@ export default {
       Albums: [],
       dialogVisible: false,
       selectedRow: {},
+      title: "",
       formData: {
         name: {
           english: "",
           chinese: "",
         },
+        categoryId: "",
       },
     };
   },
   mounted() {
     this.getAlbumsData();
   },
-  computed: {
-    tableRowClassName(row) {
-      return row?.Albums[0]?.isVisible ? "visibleAlbum" : "inVisibleAlbum";
-    },
-  },
   methods: {
+    tableRowClassName({ row }) {
+      return row?.isVisible ? "visibleAlbum" : "inVisibleAlbum";
+    },
     async getAlbumsData() {
       const id = this.$route.query.categoryId;
+      this.categoryId = id;
       await getAlbums(id).then((data) => {
         this.Albums = data;
       });
     },
 
     async handleComfirm() {
-      await updateAlbum(this.formData).then((data) => {
-        if (data.ok) {
-          Message("更新成功");
-        }
-      });
+      if (this.title === "Edit Album") {
+        await updateAlbum(this.formData).then((data) => {
+          if (data.ok) {
+            this.$message({ message: "更新成功", type: "success" });
+          }
+        });
+      }
+      if (this.title === "Add Album") {
+        this.formData.categoryId = this.categoryId;
+        await addAlbum(this.formData).then((data) => {
+          if (data.ok) {
+            this.$message({ message: "更新成功", type: "success" });
+          }
+        });
+      }
+
       this.dialogVisible = false;
       this.getAlbumsData();
     },
+
+    addAlbumClick() {
+      this.title = "Add Album";
+      this.dialogVisible = true;
+    },
     handleEdit(index, row) {
       this.selectedRow = row;
+      this.title = "Edit Album";
       this.formData = JSON.parse(JSON.stringify(this.selectedRow));
       this.dialogVisible = true;
       this.getAlbumsData();
@@ -185,7 +212,7 @@ export default {
       });
     },
     handleEpisode(index, row) {
-      this.$router.push({ name: "episode", query: { episodeId: row.id } });
+      this.$router.push({ name: "episode", query: { albumId: row.id } });
     },
   },
 };
@@ -196,5 +223,8 @@ export default {
 }
 ::v-deep .visibleAlbum {
   text-decoration: none;
+}
+.addCate {
+  margin: 10px 0;
 }
 </style>

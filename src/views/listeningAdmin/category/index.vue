@@ -1,6 +1,8 @@
 <template>
   <div class="main">
-    <el-button type="primary" class="addCate">创建分类</el-button>
+    <el-button type="primary" class="addCate" @click="addCategoryClick"
+      >创建分类</el-button
+    >
     <el-table :data="categories" style="width: 100%">
       <el-table-column label="中文标题" width="180">
         <template slot-scope="scope">
@@ -41,34 +43,36 @@
         </template>
       </el-table-column>
     </el-table>
-    <el-dialog
-      title="Edit Category"
-      :visible.sync="dialogVisible"
-      width="40%"
-      :before-close="handleClose"
-    >
-      <el-form v-model="formData" ref="form" label-width="80px">
-        <el-row :gutter="24">
-          <el-col :span="12">
-            <el-form-item label="中文标题">
-              <el-input v-model="formData.name.chinese"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="英文标题">
-              <el-input v-model="formData.name.english"></el-input>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-form-item label="封面图片">
-          <el-input v-model="formData.coverUrl"></el-input>
-        </el-form-item>
-      </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible = false">Cancel</el-button>
-        <el-button type="primary" @click="handleComfirm">Confirm</el-button>
-      </span>
-    </el-dialog>
+    <div class="editCate">
+      <el-dialog
+        :title="title"
+        :visible.sync="dialogVisible"
+        width="40%"
+        :before-close="handleClose"
+      >
+        <el-form v-model="formData" ref="form" label-width="80px">
+          <el-row :gutter="24">
+            <el-col :span="12">
+              <el-form-item label="中文标题">
+                <el-input v-model="formData.name.chinese"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="英文标题">
+                <el-input v-model="formData.name.english"></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-form-item label="封面图片">
+            <el-input v-model="formData.coverUrl"></el-input>
+          </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="dialogVisible = false">Cancel</el-button>
+          <el-button type="primary" @click="handleComfirm">Confirm</el-button>
+        </span>
+      </el-dialog>
+    </div>
   </div>
 </template>
 
@@ -79,7 +83,6 @@ import {
   deleteCategory,
   updateCategory,
 } from "@/api/category.js";
-import { Message } from "element-ui";
 
 export default {
   name: "Category",
@@ -88,6 +91,7 @@ export default {
       categories: [],
       dialogVisible: false,
       selectedRow: {},
+      title: "",
       formData: {
         name: {
           english: "",
@@ -104,22 +108,36 @@ export default {
   },
   methods: {
     async handleComfirm() {
-      await updateCategory(this.formData).then((data) => {
-        if (data.ok) {
-          Message("更新成功");
-        }
+      if (this.title === "Edit Category") {
+        await updateCategory(this.formData).then((data) => {
+          if (data.ok) {
+            this.$message({ message: "更新成功", type: "success" });
+          }
+        });
+      }
+      if (this.title === "Add Category") {
+        const category = await addCategory(this.formData).then((data) => {
+          if (data.ok) {
+            this.$message({ message: "创建成功", type: "success" });
+          }
+        });
+      }
+      getCategories().then((data) => {
+        this.categories = data;
       });
       this.dialogVisible = false;
     },
-    async save() {
-      const category = await addCategory(this.state);
-      history.back();
+    addCategoryClick() {
+      this.title = "Add Category";
+      this.dialogVisible = true;
     },
     handleEdit(index, row) {
+      this.title = "Edit Category";
       this.selectedRow = row;
       this.formData = JSON.parse(JSON.stringify(this.selectedRow));
       this.dialogVisible = true;
     },
+
     handleClose(done) {
       this.$confirm("Are you sure to close this dialog?")
         .then((_) => {
@@ -137,7 +155,7 @@ export default {
       }).then(async () => {
         await deleteCategory(id).then((res) => {
           if (res.ok) {
-            MessageBox("删除成功");
+            this.$message({ message: "删除成功", type: "success" });
           }
         });
         this.categories = this.categories.filter((e) => e.id != id); //刷新表格

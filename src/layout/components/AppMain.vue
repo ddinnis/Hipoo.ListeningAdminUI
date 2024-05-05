@@ -23,7 +23,7 @@ export default {
   min-height: calc(100vh - 50px);
   width: 90%;
   position: relative;
-  margin: 0 auto;
+  margin: 35px auto;
   overflow: hidden;
 }
 .fixed-header + .app-main {

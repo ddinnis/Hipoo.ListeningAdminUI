@@ -88,6 +88,19 @@ export const constantRoutes = [
   },
 
   {
+    path: "/uploadFile",
+    component: Layout,
+    redirect: "/uploadFile",
+    children: [
+      {
+        path: "/uploadFile",
+        name: "uploadFile",
+        component: () => import("@/views/uploadFile/index.vue"),
+        hidden: true,
+      },
+    ],
+  },
+  {
     path: "external-link",
     component: Layout,
     children: [
